@@ -1,0 +1,291 @@
+.game-controls {
+  background: white;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 1200px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* 紧凑型状态显示 */
+.game-status-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.status-divider {
+  color: #d1d5db;
+}
+
+.current-player-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #dbeafe;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.player-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 紧凑型按钮 */
+.control-button-compact {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.control-button-compact.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.control-button-compact.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+.control-button-compact.secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.control-button-compact.secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.control-button-compact.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.control-button-compact.end-turn {
+  background: #fbbf24;
+  color: #78350f;
+}
+
+.control-button-compact.end-turn:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+.control-button-compact:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.game-over-inline {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.game-info {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.game-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.game-status {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.status-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.status-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.status-value.phase {
+  color: #3b82f6;
+  background: #dbeafe;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.last-dice {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 8px;
+}
+
+.current-turn {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 8px;
+  border: 2px solid #3b82f6;
+}
+
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.turn-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.control-section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-button {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.control-button.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+}
+
+.control-button.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+}
+
+.control-button.secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.control-button.secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.build-controls,
+.trade-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.build-select {
+  padding: 10px;
+  font-size: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.build-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trade-info {
+  padding: 10px;
+  background: #fef3c7;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #92400e;
+  text-align: center;
+  font-weight: 500;
+}
+
+.game-over {
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+}
+
+.game-over h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+}
+
+.winner-text {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
