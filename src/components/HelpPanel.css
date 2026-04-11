@@ -1,0 +1,111 @@
+.help-panel {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 227, 160, 0.22), transparent 42%),
+    linear-gradient(160deg, rgba(15, 23, 35, 0.98), rgba(18, 33, 50, 0.98));
+  border-left: 1px solid rgba(169, 201, 231, 0.3);
+  box-shadow: -14px 0 32px rgba(5, 9, 16, 0.55);
+  color: #e3effc;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100vh;
+  max-width: 420px;
+  padding: 18px 16px;
+  position: fixed;
+  right: -460px;
+  top: 0;
+  transition: right 0.26s ease;
+  width: min(92vw, 420px);
+  z-index: 1300;
+}
+
+.help-panel.open {
+  right: 0;
+}
+
+.help-panel-header {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.help-panel-header h3 {
+  color: #fff0c8;
+  font-family: "Cinzel", serif;
+  margin: 0 0 4px;
+}
+
+.help-panel-header p {
+  color: #a8c3df;
+  font-size: 12px;
+  margin: 0;
+}
+
+.help-close-btn {
+  background: rgba(187, 209, 233, 0.12);
+  border: 1px solid rgba(187, 209, 233, 0.4);
+  border-radius: 8px;
+  color: #dceffd;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.help-section {
+  background: rgba(147, 178, 208, 0.09);
+  border: 1px solid rgba(147, 178, 208, 0.2);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.help-section h4 {
+  color: #ffe09f;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.help-section p {
+  color: #d8e8fa;
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.help-section ul {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding-left: 17px;
+}
+
+.help-section li {
+  color: #d8e8fa;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.help-section .hint-title {
+  color: #fff2cd;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.help-section.compact {
+  margin-top: auto;
+}
+
+.restart-guide-btn {
+  background: linear-gradient(135deg, #3a87e2, #1f5ca4);
+  border: 1px solid rgba(154, 191, 236, 0.62);
+  border-radius: 9px;
+  color: #eef8ff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 12px;
+  width: 100%;
+}

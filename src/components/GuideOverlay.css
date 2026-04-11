@@ -1,0 +1,92 @@
+.guide-overlay-root {
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 1400;
+}
+
+.guide-spotlight {
+  border: 2px solid rgba(255, 231, 176, 0.92);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 9999px rgba(5, 9, 16, 0.68),
+    0 0 25px rgba(255, 226, 157, 0.45);
+  pointer-events: none;
+  position: fixed;
+}
+
+.guide-card {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 222, 149, 0.2), transparent 45%),
+    linear-gradient(145deg, rgba(16, 26, 40, 0.96), rgba(24, 41, 61, 0.96));
+  border: 1px solid rgba(182, 212, 239, 0.36);
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgba(2, 6, 12, 0.55);
+  color: #edf4ff;
+  padding: 16px;
+  pointer-events: auto;
+  position: fixed;
+}
+
+.guide-progress {
+  color: #b4d8ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.guide-card h3 {
+  color: #fff1cd;
+  font-family: "Cinzel", serif;
+  font-size: 20px;
+  margin: 8px 0 8px;
+}
+
+.guide-card p {
+  color: #d7e8fb;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.guide-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.guide-btn {
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 8px 12px;
+}
+
+.guide-btn.ghost {
+  background: rgba(193, 214, 240, 0.12);
+  border: 1px solid rgba(193, 214, 240, 0.34);
+  color: #ddebfa;
+}
+
+.guide-btn.primary {
+  background: linear-gradient(135deg, #3e88df, #1f5ea9);
+  border: 1px solid rgba(134, 181, 232, 0.65);
+  color: #eef8ff;
+}
+
+.guide-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 760px) {
+  .guide-card {
+    left: 10px !important;
+    right: 10px;
+    width: auto !important;
+  }
+}
