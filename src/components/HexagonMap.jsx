@@ -16,7 +16,7 @@ const RESOURCE_ICONS = {
   sheep: "🐑",
   wheat: "🌾",
   ore: "⛏️",
-  desert: "🏜️",
+  generic: "⚓", // 3:1 普通港口
 };
 
 const HexagonMap = ({
@@ -30,6 +30,7 @@ const HexagonMap = ({
   hintPositions,
 }) => {
   const isSetupOrBuildMode = currentPhase === "setup" || Boolean(buildMode);
+  
   const hintKeySet = useMemo(
     () => new Set((hintPositions || []).map((pos) => `${pos[0]},${pos[1]},${pos[2]}`)),
     [hintPositions]
@@ -42,17 +43,6 @@ const HexagonMap = ({
     return { x: x + 450, y: y + 450 };
   };
 
-  const generateHexPath = (centerX, centerY, size = 60) => {
-    const points = [];
-    for (let i = 0; i < 6; i += 1) {
-      const angle = (Math.PI / 3) * i - Math.PI / 2;
-      points.push(`${centerX + size * Math.cos(angle)},${centerY + size * Math.sin(angle)}`);
-    }
-    return `M ${points.join(" L ")} Z`;
-  };
-
-  const getNumberColor = (number) => (number === 6 || number === 8 ? "#c81f1f" : "#1c2430");
-
   const getVertexPosition = (centerX, centerY, direction, size = 60) => {
     const angle = (Math.PI / 3) * direction - Math.PI / 2;
     return {
@@ -61,210 +51,179 @@ const HexagonMap = ({
     };
   };
 
-  const shouldHintVertex = (positionKey) =>
-    hintKeySet.has(positionKey) && (hintAction === "build_settlement" || hintAction === "build_city");
+  const generateHexPath = (centerX, centerY, size = 60) => {
+    const points = [];
+    for (let i = 0; i < 6; i += 1) {
+      const p = getVertexPosition(centerX, centerY, i, size);
+      points.push(`${p.x},${p.y}`);
+    }
+    return `M ${points.join(" L ")} Z`;
+  };
 
-  const shouldHintEdge = (positionKey) => hintKeySet.has(positionKey) && hintAction === "build_road";
+  const getNumberColor = (number) => (number === 6 || number === 8 ? "#ff4d4d" : "#1c2430");
+
+  // 辅助函数：根据坐标判断港口应该朝向哪个方向（面向地图外侧）
+  const getHarborDirection = (q, r) => {
+    if (q === 0 && r === -2) return 0;
+    if (q === 1 && r === -2) return 0;
+    if (q === 2 && r === -2) return 1;
+    if (q === 2 && r === -1) return 1;
+    if (q === 2 && r === 0) return 2;
+    if (q === 1 && r === 1) return 2;
+    if (q === 0 && r === 2) return 3;
+    if (q === -1 && r === 2) return 3;
+    if (q === -2 && r === 2) return 4;
+    if (q === -2 && r === 1) return 4;
+    if (q === -2 && r === 0) return 5;
+    if (q === -1 && r === -1) return 5;
+    return 0;
+  };
 
   return (
-    <div className="hexagon-map-container" data-guide-target="hex-map">
-      <svg width="950" height="750" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet">
+    <div className="hexagon-map-container">
+      <svg width="950" height="850" viewBox="0 0 900 900" preserveAspectRatio="xMidYMid meet">
         <defs>
           <filter id="hexShadow">
-            <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.32" />
+            <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.4" />
           </filter>
-          <filter id="robberShadow">
-            <feDropShadow dx="1" dy="1" stdDeviation="2" floodOpacity="0.45" />
-          </filter>
+          {/* 海洋波纹纹理 */}
+          <pattern id="ocean-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+            <path d="M0 50 Q 25 35 50 50 T 100 50" fill="none" stroke="white" strokeOpacity="0.05" />
+          </pattern>
         </defs>
 
+        {/* 渲染背景装饰 */}
+        <rect width="100%" height="100%" fill="url(#ocean-pattern)" pointerEvents="none" />
+
+        {/* 渲染六边形地块 */}
         {hexagons?.map((hex) => {
           const { x, y } = hexToPixel(hex.q, hex.r);
           return (
-            <g
-              key={`hex-${hex.q}-${hex.r}`}
-              className="hexagon-group"
-              onClick={() => onHexClick?.(hex)}
-              style={{ cursor: onHexClick ? "pointer" : "default" }}
-            >
+            <g key={`hex-${hex.q}-${hex.r}`} className="hexagon-group">
               <path
                 d={generateHexPath(x, y)}
                 fill={TERRAIN_COLORS[hex.terrain] || "#8f9ba8"}
-                stroke="#202833"
-                strokeWidth="2"
+                stroke="#1a2533"
+                strokeWidth="2.5"
                 filter="url(#hexShadow)"
                 className="hexagon-path"
+                onClick={() => onHexClick?.(hex)}
               />
 
-              <text x={x} y={y - 10} textAnchor="middle" fontSize="23">
+              {/* 渲染港口 (后端新增数据) */}
+              {hex.is_port && (
+                <g transform={`translate(${x}, ${y})`}>
+                   {/* 简单的港口标记：一个小圆圈代表码头 */}
+                   <circle 
+                    cx={65 * Math.cos((Math.PI/3) * getHarborDirection(hex.q, hex.r) - Math.PI/2)} 
+                    cy={65 * Math.sin((Math.PI/3) * getHarborDirection(hex.q, hex.r) - Math.PI/2)} 
+                    r="12" 
+                    fill="#2c3e50" 
+                    stroke="#ecf0f1" 
+                    strokeWidth="2"
+                  />
+                  <text 
+                    x={65 * Math.cos((Math.PI/3) * getHarborDirection(hex.q, hex.r) - Math.PI/2)} 
+                    y={65 * Math.sin((Math.PI/3) * getHarborDirection(hex.q, hex.r) - Math.PI/2) + 5}
+                    textAnchor="middle" 
+                    fontSize="12" 
+                    fill="white"
+                  >
+                    {RESOURCE_ICONS[hex.port_type] || RESOURCE_ICONS.generic}
+                  </text>
+                </g>
+              )}
+
+              {/* 资源图标 */}
+              <text x={x} y={y - 12} textAnchor="middle" fontSize="26">
                 {RESOURCE_ICONS[hex.resource] || ""}
               </text>
 
+              {/* 骰子数字 */}
               {hex.number && (
-                <>
-                  <circle cx={x} cy={y + 16} r="18" fill="#f5ede0" stroke="#2f3945" strokeWidth="1.5" />
+                <g className="number-token">
+                  <circle cx={x} cy={y + 18} r="16" fill="#fdf5e6" stroke="#2c3e50" strokeWidth="1" />
                   <text
                     x={x}
-                    y={y + 22}
+                    y={y + 24}
                     textAnchor="middle"
-                    fontSize="18"
-                    fontWeight="bold"
+                    fontSize="16"
+                    fontWeight="900"
                     fill={getNumberColor(hex.number)}
                   >
                     {hex.number}
                   </text>
-                </>
+                </g>
               )}
 
+              {/* 强盗 */}
               {hex.has_robber && (
-                <g filter="url(#robberShadow)">
-                  <circle cx={x} cy={y} r="15" fill="#1f1f1f" opacity="0.86" />
-                  <text x={x} y={y + 7} textAnchor="middle" fontSize="20">
-                    🦹
-                  </text>
-                </g>
+                <text x={x} y={y + 5} textAnchor="middle" fontSize="30" style={{ pointerEvents: 'none' }}>
+                  👤
+                </text>
               )}
             </g>
           );
         })}
 
-        {isSetupOrBuildMode &&
-          (!buildMode || buildMode === "settlement") &&
-          hexagons?.flatMap((hex) => {
+        {/* 渲染道路提示/点击层 */}
+        {isSetupOrBuildMode && buildMode === "road" && hexagons?.flatMap((hex) => {
             const { x, y } = hexToPixel(hex.q, hex.r);
-            return [0, 1, 2, 3, 4, 5].map((direction) => {
-              const vertex = getVertexPosition(x, y, direction);
-              const key = `${hex.q},${hex.r},${direction}`;
-              return (
-                <circle
-                  key={`vertex-${key}`}
-                  cx={vertex.x}
-                  cy={vertex.y}
-                  r="9"
-                  fill="#4f86db"
-                  fillOpacity="0.7"
-                  stroke="#f3fbff"
-                  strokeWidth="2"
-                  className={`vertex-clickable ${shouldHintVertex(key) ? "hint-target-vertex" : ""}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onHexClick?.(hex, "vertex", direction);
-                  }}
-                />
-              );
-            });
-          })}
-
-        {isSetupOrBuildMode &&
-          buildMode === "road" &&
-          hexagons?.flatMap((hex) => {
-            const { x, y } = hexToPixel(hex.q, hex.r);
-            return [0, 1, 2, 3, 4, 5].map((direction) => {
-              const v1 = getVertexPosition(x, y, direction);
-              const v2 = getVertexPosition(x, y, (direction + 1) % 6);
-              const key = `${hex.q},${hex.r},${direction}`;
+            return [0, 1, 2, 3, 4, 5].map((dir) => {
+              const v1 = getVertexPosition(x, y, dir);
+              const v2 = getVertexPosition(x, y, (dir + 1) % 6);
+              const key = `${hex.q},${hex.r},${dir}`;
               return (
                 <line
-                  key={`edge-${key}`}
-                  x1={v1.x}
-                  y1={v1.y}
-                  x2={v2.x}
-                  y2={v2.y}
-                  stroke="#39b478"
-                  strokeWidth="7"
-                  strokeOpacity="0.66"
-                  className={`edge-clickable ${shouldHintEdge(key) ? "hint-target-edge" : ""}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onHexClick?.(hex, "edge", direction);
-                  }}
+                  key={`edge-guide-${key}`}
+                  x1={v1.x} y1={v1.y} x2={v2.x} y2={v2.y}
+                  className={`edge-clickable ${hintKeySet.has(key) ? "hint-target-edge" : ""}`}
+                  onClick={(e) => { e.stopPropagation(); onHexClick?.(hex, "edge", dir); }}
                 />
               );
             });
-          })}
+        })}
 
-        {buildMode === "city" &&
-          buildings &&
-          Object.entries(buildings).map(([key, building]) => {
-            if (building.type !== "settlement") {
-              return null;
-            }
-            const [q, r, direction] = building.position || [0, 0, 0];
-            const { x, y } = hexToPixel(q, r);
-            const vertex = getVertexPosition(x, y, direction);
-            const shouldHint = shouldHintVertex(`${q},${r},${direction}`);
-
-            return (
-              <circle
-                key={`city-upgrade-${key}`}
-                cx={vertex.x}
-                cy={vertex.y}
-                r="22"
-                fill="none"
-                stroke={shouldHint ? "#f4d389" : "#f7b058"}
-                strokeWidth="3"
-                strokeDasharray="7,4"
-                className={`city-upgrade-highlight ${shouldHint ? "hint-city-ring" : ""}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  const sourceHex = hexagons?.find((hex) => hex.q === q && hex.r === r);
-                  if (sourceHex) {
-                    onHexClick?.(sourceHex, "vertex", direction);
-                  }
-                }}
-              />
-            );
-          })}
-
-        {buildings &&
-          Object.entries(buildings).map(([key, building]) => {
-            const [q, r, direction] = building.position || [0, 0, 0];
-            const { x, y } = hexToPixel(q, r);
-            const vertex = getVertexPosition(x, y, direction);
-            const shouldFlashCityUpgrade =
-              hintAction === "build_city" &&
-              building.type === "settlement" &&
-              hintKeySet.has(`${q},${r},${direction}`);
-
-            return (
-              <g key={`building-${key}`}>
+        {/* 渲染顶点提示/点击层 */}
+        {isSetupOrBuildMode && (!buildMode || buildMode === "settlement") && hexagons?.flatMap((hex) => {
+            const { x, y } = hexToPixel(hex.q, hex.r);
+            return [0, 1, 2, 3, 4, 5].map((dir) => {
+              const vertex = getVertexPosition(x, y, dir);
+              const key = `${hex.q},${hex.r},${dir}`;
+              return (
                 <circle
-                  cx={vertex.x}
-                  cy={vertex.y}
-                  r="17"
-                  fill={building.type === "city" ? "#f0a638" : "#3bc48a"}
-                  stroke="#ffffff"
-                  strokeWidth="3"
+                  key={`vertex-guide-${key}`}
+                  cx={vertex.x} cy={vertex.y} r="8"
+                  className={`vertex-clickable ${hintKeySet.has(key) ? "hint-target-vertex" : ""}`}
+                  onClick={(e) => { e.stopPropagation(); onHexClick?.(hex, "vertex", dir); }}
                 />
-                <text x={vertex.x} y={vertex.y + 7} textAnchor="middle" fontSize="21">
-                  {building.type === "city" ? "🏛️" : "🏘️"}
-                </text>
-                {shouldFlashCityUpgrade && (
-                  <circle cx={vertex.x} cy={vertex.y} r="22" className="hint-city-ring" />
-                )}
-              </g>
-            );
-          })}
+              );
+            });
+        })}
 
-        {roads &&
-          Object.entries(roads).map(([key, road]) => {
-            const [q, r, direction] = road.position || [0, 0, 0];
-            const { x, y } = hexToPixel(q, r);
-            const v1 = getVertexPosition(x, y, direction);
-            const v2 = getVertexPosition(x, y, (direction + 1) % 6);
-            return (
-              <line
-                key={`road-${key}`}
-                x1={v1.x}
-                y1={v1.y}
-                x2={v2.x}
-                y2={v2.y}
-                stroke="#db4a45"
-                strokeWidth="9"
-                strokeLinecap="round"
-              />
-            );
-          })}
+        {/* 渲染已有的道路 */}
+        {roads && Object.entries(roads).map(([key, road]) => {
+          const [q, r, dir] = road.position;
+          const { x, y } = hexToPixel(q, r);
+          const v1 = getVertexPosition(x, y, dir);
+          const v2 = getVertexPosition(x, y, (dir + 1) % 6);
+          return (
+            <line key={`road-built-${key}`} x1={v1.x} y1={v1.y} x2={v2.x} y2={v2.y} className="road-line" />
+          );
+        })}
+
+        {/* 渲染已有的建筑 */}
+        {buildings && Object.entries(buildings).map(([key, b]) => {
+          const [q, r, dir] = b.position;
+          const { x, y } = hexToPixel(q, r);
+          const vertex = getVertexPosition(x, y, dir);
+          return (
+            <g key={`build-built-${key}`} transform={`translate(${vertex.x}, ${vertex.y})`}>
+              <circle r="14" fill={b.type === "city" ? "#f39c12" : "#27ae60"} stroke="white" strokeWidth="2" />
+              <text textAnchor="middle" y="5" fontSize="16">{b.type === "city" ? "🏛️" : "🏠"}</text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
