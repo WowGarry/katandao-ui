@@ -28,6 +28,7 @@ const HexagonMap = ({
   currentPhase,
   hintAction,
   hintPositions,
+  players
 }) => {
   const isSetupOrBuildMode = currentPhase === "setup" || Boolean(buildMode);
   
@@ -78,6 +79,20 @@ const HexagonMap = ({
     if (q === -1 && r === -1) return 5;
     return 0;
   };
+
+  // 使用 useMemo 缓存颜色映射表，防止重复查找
+  const playerColorMap = useMemo(() => {
+    const map = {};
+    // 注意：这里使用 players (复数) 进行遍历
+    if (Array.isArray(players)) {
+      players.forEach(p => {
+        // 使用 String 转换 ID，确保类型一致，并匹配后端字段 player_id
+        map[String(p.player_id)] = p.color;
+      });
+    }
+    return map;
+  }, [players]);
+
 
   return (
     <div className="hexagon-map-container">
@@ -200,27 +215,52 @@ const HexagonMap = ({
               );
             });
         })}
-
-        {/* 渲染已有的道路 */}
+{/* 渲染已有的道路 */}
         {roads && Object.entries(roads).map(([key, road]) => {
+          if (!road?.position) return null;
           const [q, r, dir] = road.position;
           const { x, y } = hexToPixel(q, r);
           const v1 = getVertexPosition(x, y, dir);
           const v2 = getVertexPosition(x, y, (dir + 1) % 6);
+          
+          // 从映射表取色，若无则默认为白色 (防止黑屏)
+          const roadColor = playerColorMap[String(road.player_id)] || "#ffffff";
+
           return (
-            <line key={`road-built-${key}`} x1={v1.x} y1={v1.y} x2={v2.x} y2={v2.y} className="road-line" />
+            <line 
+              key={`road-built-${key}`} 
+              x1={v1.x} y1={v1.y} x2={v2.x} y2={v2.y} 
+              className="road-line" 
+              style={{ 
+                stroke: roadColor, // 关键：同步颜色
+                strokeWidth: "8px", 
+                strokeLinecap: "round"
+              }} 
+            />
           );
         })}
 
         {/* 渲染已有的建筑 */}
         {buildings && Object.entries(buildings).map(([key, b]) => {
+          if (!b?.position) return null;
           const [q, r, dir] = b.position;
           const { x, y } = hexToPixel(q, r);
           const vertex = getVertexPosition(x, y, dir);
+
+          const buildColor = playerColorMap[String(b.player_id)] || "#ffffff";
+
           return (
             <g key={`build-built-${key}`} transform={`translate(${vertex.x}, ${vertex.y})`}>
-              <circle r="14" fill={b.type === "city" ? "#f39c12" : "#27ae60"} stroke="white" strokeWidth="2" />
-              <text textAnchor="middle" y="5" fontSize="16">{b.type === "city" ? "🏛️" : "🏠"}</text>
+              <circle 
+                r={b.type === "city" ? "17" : "14"} 
+                fill={buildColor} // 关键：同步颜色
+                stroke="white" 
+                strokeWidth="2.5" 
+                style={{ filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.4))" }}
+              />
+              <text textAnchor="middle" y="5" fontSize="16" style={{ pointerEvents: "none" }}>
+                {b.type === "city" ? "🏛️" : "🏠"}
+              </text>
             </g>
           );
         })}

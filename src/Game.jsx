@@ -577,6 +577,7 @@ const Game = () => {
                 currentPhase={gameState.phase}
                 hintAction={guideHint?.action}
                 hintPositions={hintPositions}
+                players={gameState.players}
               />
             )}
           </div>

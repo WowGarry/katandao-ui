@@ -67,8 +67,8 @@
 
 /* 已建成物体的样式 */
 .road-line {
-  stroke: #e74c3c;
-  stroke-width: 10;
+  
+  stroke-width: 8;
   stroke-linecap: round;
   filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
 }
