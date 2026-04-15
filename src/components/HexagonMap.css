@@ -13,6 +13,8 @@
   height: 100%;
 }
 
+
+
 /* 六边形样式 */
 .hexagon-path {
   cursor: pointer;
@@ -23,20 +25,26 @@
   filter: brightness(1.15);
 }
 
-/* 顶点交互优化：取消闪烁动画，改为纯缩放 */
 .vertex-clickable {
   fill: #4f86db;
   fill-opacity: 0.5;
   stroke: white;
   stroke-width: 1.5;
   cursor: pointer;
-  transition: transform 0.15s ease-out, fill-opacity 0.2s ease;
+  
+  /* 关键修改：设置缩放中心点为物体中心 */
+  transform-box: fill-box;
+  transform-origin: center;
+  
+  /* 优化 transition，时间缩短一点会更跟手 */
+  transition: transform 0.2s ease-out, fill-opacity 0.2s ease;
   pointer-events: all;
 }
 
 .vertex-clickable:hover {
   fill-opacity: 0.9;
-  transform: scale(1.4); /* 仅放大，不触发 Animation 以防闪烁 */
+  /* 确保在 hover 时位置保持不动 */
+  transform: scale(1.4); 
 }
 
 /* 道路交互 */
