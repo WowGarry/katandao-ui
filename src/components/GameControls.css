@@ -122,3 +122,104 @@
     box-shadow: 0 0 0 9px rgba(60, 207, 136, 0);
   }
 }
+
+
+
+/* --- 骰子弹窗样式 --- */
+
+/* 全屏遮罩层 */
+.dice-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 10, 18, 0.7); /* 暗黑半透明背景 */
+  backdrop-filter: blur(4px); /* 背景模糊效果 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* 确保在最顶层 */
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 弹窗内容区 */
+.dice-popup-content {
+  background: linear-gradient(145deg, rgba(31, 54, 80, 0.95), rgba(14, 23, 38, 0.95));
+  border: 1px solid rgba(162, 194, 225, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(47, 130, 232, 0.2);
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-popup-title {
+  color: #ffe6a1;
+  font-size: 18px;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* 骰子排列容器 */
+.dice-faces-container {
+  display: flex;
+  gap: 15px;
+}
+
+/* 单个骰子外观 */
+.dice-face {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ffffff, #e6f0fa);
+  border-radius: 12px;
+  box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: #1b5cae; /* 使用你按钮的主题蓝 */
+  border: 2px solid #a2c2e1;
+}
+
+/* 总计文字 */
+.dice-popup-total {
+  color: #d9e8f8;
+  font-size: 16px;
+}
+
+.dice-popup-total span {
+  font-size: 24px;
+  font-weight: bold;
+  color: #3ccf88; /* 使用你 active 按钮的主题绿 */
+  margin-left: 8px;
+}
+
+/* 弹窗按钮加宽 */
+.dice-popup-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popUp {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

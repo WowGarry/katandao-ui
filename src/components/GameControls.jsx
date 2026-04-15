@@ -35,12 +35,12 @@ const GameControls = ({
         </span>
         <span className="status-divider">|</span>
         <span className="status-item phase">{phaseLabel[gameState?.phase] || gameState?.phase}</span>
-        {gameState?.last_dice_roll && (
-          <>
-            <span className="status-divider">|</span>
-            <span className="status-item">骰点: {gameState.last_dice_roll}</span>
-          </>
-        )}
+        {gameState?.last_dice_roll && gameState?.phase !== "roll_dice" && (
+  <>
+    <span className="status-divider">|</span>
+    <span className="status-item">骰点: {gameState.last_dice_roll}</span>
+  </>
+)}
       </div>
 
       {currentPlayer && (

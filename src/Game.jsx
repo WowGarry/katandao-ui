@@ -81,6 +81,9 @@ const Game = () => {
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
   const [tutorialTargetRect, setTutorialTargetRect] = useState(null);
 
+  // 【新增】1. 骰子弹窗状态
+  const [dicePopup, setDicePopup] = useState(null);
+
   const aiTurnLockRef = useRef(false);
 
   const currentPlayer = useMemo(
@@ -156,6 +159,7 @@ const Game = () => {
     }
   };
 
+  // 【修改】2. 整合了弹窗逻辑的掷骰子函数
   const handleRollDice = async () => {
     if (!gameId || !gameState) {
       return;
@@ -170,7 +174,19 @@ const Game = () => {
         return;
       }
 
+      // 更新游戏状态
       setGameState(result.game_state);
+      
+      // 【新增逻辑】设置弹窗内容
+      setDicePopup({
+        dice1: result.dice1,
+        dice2: result.dice2,
+        total: result.total
+      });
+
+      // 3秒后自动关闭（可选）
+      setTimeout(() => setDicePopup(null), 3000);
+
       setMessage(`掷骰结果: ${result.dice1} + ${result.dice2} = ${result.total}`);
     } catch (requestError) {
       setError(`掷骰失败: ${requestError.message}`);
@@ -651,6 +667,27 @@ const Game = () => {
         onNext={nextTutorialStep}
         onSkip={finishTutorial}
       />
+
+      {dicePopup && (
+        <div className="dice-popup-overlay" onClick={() => setDicePopup(null)}>
+          <div className="dice-popup-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="dice-popup-title">掷骰结果</h3>
+            <div className="dice-faces-container">
+              <div className="dice-face">{dicePopup.dice1}</div>
+              <div className="dice-face">{dicePopup.dice2}</div>
+            </div>
+            <div className="dice-popup-total">
+              总计: <span>{dicePopup.total}</span>
+            </div>
+            <button 
+              className="control-button-compact primary dice-popup-btn" 
+              onClick={() => setDicePopup(null)}
+            >
+              确定
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

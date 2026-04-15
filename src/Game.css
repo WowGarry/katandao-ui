@@ -137,20 +137,61 @@
   grid-area: player4;
 }
 
+/* --- 强化版建造提示：大、醒目、闪烁 --- */
 .build-mode-hint {
-  background: linear-gradient(135deg, #f2bf59, #e39a2f);
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(139, 83, 22, 0.35);
-  color: #412200;
-  font-size: 12px;
-  font-weight: 700;
-  left: 50%;
-  padding: 8px 16px;
+  /* 背景：更厚重的渐变，增加质感 */
+  background: linear-gradient(135deg, #f2bf59 0%, #e39a2f 100%);
+  border-radius: 50px; /* 圆角胶囊形状 */
+  
+  /* 阴影：基础阴影加上发光效果 */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  
+  /* 文字：变大，增加可读性 */
+  color: #211100; /* 调深一点文字颜色，增加对比 */
+  font-size: 16px; /* 字体变大 */
+  font-weight: 800; /* 加粗 */
+  letter-spacing: 0.5px; /* 增加字间距 */
+  text-align: center;
+  
+  /* 尺寸与布局 */
+  padding: 14px 30px; /* 增加内边距，让整个提示变大 */
+  min-width: 250px; /* 设置最小宽度 */
   pointer-events: none;
+  
+  /* 定位：底部中央，避开顶部控制栏 */
   position: fixed;
-  top: 93px;
+  left: 50%;
+  bottom: 50px; /* 距离底部 50px，黄金位置 */
+  top: auto; /* 确保取消 top 定位 */
   transform: translateX(-50%);
+  
   z-index: 1200;
+  border: 3px solid rgba(255, 255, 255, 0.5); /* 增加边缘白边 */
+  
+  /* -------------------------------------------------- */
+  /* 【核心】闪烁效果 (呼吸灯发光) */
+  /* -------------------------------------------------- */
+  /* 这里的 1.5s 决定了闪烁的快慢，ease-in-out 让效果平滑 */
+  animation: modePulse 1.5s ease-in-out infinite; 
+}
+
+/* 呼吸闪烁动画定义 */
+@keyframes modePulse {
+  0% {
+    /* 初始状态：无外发光 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    transform: translateX(-50%) scale(1); /* 初始大小 */
+  }
+  50% {
+    /* 最亮状态：强烈的橙色外发光 */
+    box-shadow: 0 0 35px rgba(227, 154, 47, 0.9);
+    transform: translateX(-50%) scale(1.02); /* 稍微变大一点点 */
+  }
+  100% {
+    /* 回到初始状态 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 .coach-hint {
@@ -226,6 +267,7 @@
   padding: 6px 10px;
 }
 
+/* 1. 基础样式 */
 .message-toast {
   align-items: center;
   border-radius: 11px;
@@ -235,22 +277,63 @@
   font-weight: 700;
   gap: 10px;
   max-width: 520px;
-  padding: 12px 15px;
+  padding: 12px 18px; /* 稍微加宽一点 */
   position: fixed;
   right: 18px;
-  z-index: 1200;
+  z-index: 1300; /* 提高层级，确保在最前面 */
+  
+  /* 解决动画冲突：先执行入场(0.4s)，然后无限循环呼吸闪烁(2s) */
+  animation: toastEntrance 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
+    toastFlash 2.5s infinite 0.8s ease-in-out;
+  
+  /* 初始透明度设为0，防止加载时闪现 */
+  opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  pointer-events: auto; /* 确保关闭按钮可以点 */
 }
 
+/* 2. 成功消息样式 */
 .message-toast.success {
   background: linear-gradient(135deg, #2e9b6d, #1d714f);
   color: #f0fff8;
   top: 98px;
 }
 
+/* 3. 错误消息样式 */
 .message-toast.error {
   background: linear-gradient(135deg, #c34a4a, #8f2929);
   color: #fff2f2;
   top: 156px;
+}
+
+/* --- 关键帧动画 --- */
+
+/* 入场：从右侧弹出并带一点放大效果 */
+@keyframes toastEntrance {
+  0% {
+    opacity: 0;
+    transform: translateX(50px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* 呼吸闪烁：通过亮度和外发光变化 */
+@keyframes toastFlash {
+  0% {
+    filter: brightness(1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    filter: brightness(1.2); /* 变亮 */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* 增加微光 */
+  }
+  100% {
+    filter: brightness(1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .toast-close {
