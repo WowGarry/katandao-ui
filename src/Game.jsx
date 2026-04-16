@@ -218,28 +218,36 @@ const Game = () => {
     }
   };
 
-  const handleTrade = async (give, receive) => {
-    if (!gameId || !gameState) {
+const handleTrade = async (giveOrState, receive) => {
+  if (!gameId || !gameState) return;
+
+  // ✨ 关键逻辑：判断第一个参数是“要给出的资源”还是“新的游戏状态”
+  if (giveOrState && giveOrState.players) { 
+    // 情况 A: 传入的是 newGameState (来自 BankTradePanel 的成功回调)
+    setGameState(giveOrState);
+    setMessage("银行交易已执行");
+    return; // 直接结束，不需要再调 API
+  }
+
+  // 情况 B: 传入的是资源 (原有逻辑)
+  setLoading(true);
+  setError(null);
+  try {
+    const result = await api.tradeWithBank(gameId, gameState.current_player_id, giveOrState, receive);
+    
+    if (!result.success) {
+      setError(result.error || result.message || "交易失败");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await api.tradeWithBank(gameId, gameState.current_player_id, give, receive);
-      if (!result.success) {
-        setError(result.error || result.message || "交易失败");
-        return;
-      }
-
-      setGameState(result.game_state);
-      setMessage(result.message || "银行交易已执行");
-    } catch (requestError) {
-      setError(`交易失败: ${requestError.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setGameState(result.game_state);
+    setMessage(result.message || "银行交易已执行");
+  } catch (requestError) {
+    setError(`交易失败: ${requestError.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEndTurn = async () => {
     if (!gameId || !gameState) {
@@ -356,6 +364,8 @@ const Game = () => {
       setLoading(false);
     }
   };
+
+  
 
   const handleHexClick = (hex, clickType = "hex", direction = 0) => {
     if (!gameId || !gameState) {
@@ -510,6 +520,7 @@ const Game = () => {
 
   const hintPositions = Array.isArray(guideHint?.suggested_positions) ? guideHint.suggested_positions : [];
 
+
   return (
     <div className="game-container">
       <header className="game-header">
@@ -558,6 +569,7 @@ const Game = () => {
               }}
               onTrade={handleTrade}
               onEndTurn={handleEndTurn}
+              setGameState={setGameState}
               buildMode={buildMode}
               onCancelBuild={() => {
                 setBuildMode(null);
@@ -580,6 +592,7 @@ const Game = () => {
                 players={gameState.players}
               />
             )}
+            
           </div>
 
           {gameState?.players?.map((player) => (

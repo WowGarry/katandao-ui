@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react"; // 确保这里引入了 useState
 import "./GameControls.css";
+import BankTradePanel from "./BankTradePanel";
 
 const phaseLabel = {
   roll_dice: "掷骰阶段",
@@ -18,7 +19,12 @@ const GameControls = ({
   onEndTurn,
   buildMode,
   onCancelBuild,
+  setGameState,
 }) => {
+  // 1. 控制交易面板的显示
+  const [showTradeBank, setShowTradeBank] = useState(false);
+
+  // 2. 统一变量声明（删除了重复的部分）
   const currentPlayer = gameState?.players?.find(
     (player) => player.player_id === gameState.current_player_id
   );
@@ -36,11 +42,11 @@ const GameControls = ({
         <span className="status-divider">|</span>
         <span className="status-item phase">{phaseLabel[gameState?.phase] || gameState?.phase}</span>
         {gameState?.last_dice_roll && gameState?.phase !== "roll_dice" && (
-  <>
-    <span className="status-divider">|</span>
-    <span className="status-item">骰点: {gameState.last_dice_roll}</span>
-  </>
-)}
+          <>
+            <span className="status-divider">|</span>
+            <span className="status-item">骰点: {gameState.last_dice_roll}</span>
+          </>
+        )}
       </div>
 
       {currentPlayer && (
@@ -101,14 +107,15 @@ const GameControls = ({
         </>
       )}
 
+      {/* 银行交易按钮逻辑修改：点击打开/关闭面板 */}
       {canTrade && (
         <button
           type="button"
-          className="control-button-compact secondary"
-          onClick={() => onTrade({ wood: 4 }, { brick: 1 })}
+          className={`control-button-compact ${showTradeBank ? "active" : "secondary"}`}
+          onClick={() => setShowTradeBank(!showTradeBank)}
           data-guide-target="trade-bank-btn"
         >
-          4:1 银行交易
+          {showTradeBank ? "取消交易" : "4:1 银行交易"}
         </button>
       )}
 
@@ -126,6 +133,18 @@ const GameControls = ({
           胜者: {gameState.players?.find((p) => p.player_id === gameState.winner_id)?.name || "未知"}
         </div>
       )}
+
+{/* 交易面板弹窗逻辑：删掉了原有的 left:50% 等干扰样式 */}
+{showTradeBank && canTrade && currentPlayer && (
+  <BankTradePanel 
+    gameId={gameState.game_id} 
+    player={currentPlayer} 
+    onTradeSuccess={(newGameState) => {
+      onTrade(newGameState); 
+      setShowTradeBank(false); 
+    }}
+  />
+)}
     </div>
   );
 };

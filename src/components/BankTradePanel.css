@@ -1,0 +1,124 @@
+.bank-trade-panel {
+  /* 1. 核心定位：相对于 .hexagon-map-container 的右下角 */
+  position: absolute; 
+  right: 278px;   /* 距离右边缘的间距 */
+  bottom: 37px;  /* 距离下边缘的间距 */
+  
+  /* 2. 尺寸与比例：维持你满意的放大效果 */
+  width: 480px;  
+  padding: 24px;
+  
+  /* 3. 视觉质感：指挥台深色科技风格 */
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  
+  /* 确保在地图瓦片之上 */
+  z-index: 50; 
+  
+  /* 重置可能存在的干扰属性 */
+  left: auto;
+  top: auto;
+  margin: 0;
+  transform: none;
+
+  /* 入场动画 */
+  animation: tradePopupIn 0.3s ease-out;
+}
+
+@keyframes tradePopupIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bank-trade-panel h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.4rem; /* 字体同步加大 */
+  color: #f8fafc;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.trade-section h4 {
+  margin: 10px 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+/* 资源按钮：等比例放大 */
+.resource-buttons {
+  display: flex;
+  gap: 12px; /* 间隙加大 */
+  justify-content: center;
+}
+
+.res-btn {
+  position: relative;
+  /* 保持原有长宽比，尺寸放大 1.3 倍 */
+  width: 65px; 
+  height: 80px; 
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem; /* 图标加大 */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.res-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+  transform: translateY(-4px);
+}
+
+.res-btn.selected {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.res-btn:disabled {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.count-badge {
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 6px;
+  color: #cbd5e1;
+}
+
+/* 确认按钮：更具指挥台风格 */
+.submit-trade-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  transition: all 0.2s;
+}
+
+.submit-trade-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+}
+
+.submit-trade-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  box-shadow: none;
+}
