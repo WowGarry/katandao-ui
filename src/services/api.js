@@ -3,6 +3,22 @@ const API_BASE_URL = "http://localhost:5000/api";
 const jsonRequest = async (url, options = {}) => {
   const response = await fetch(url, options);
   return response.json();
+  try {
+    console.debug('[API] Request:', url, options);
+    const response = await fetch(url, options);
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = { raw: text };
+    }
+    console.debug('[API] Response:', url, response.status, data);
+    return data;
+  } catch (err) {
+    console.error('[API] Request error:', url, err);
+    throw err;
+  }
 };
 
 export const api = {

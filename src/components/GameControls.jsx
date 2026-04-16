@@ -7,6 +7,7 @@ const phaseLabel = {
   trade: "交易 / 建造",
   build: "建造阶段",
   setup: "开局部署",
+  setup: "当前阶段：设置阶段，先放置定居点",
   discard: "弃牌阶段",
   move_robber: "移动强盗",
 };
@@ -84,7 +85,6 @@ const GameControls = ({
           >
             道路
           </button>
-          {gameState?.phase !== "setup" && (
             <button
               type="button"
               className={`control-button-compact ${buildMode === "city" ? "active" : "secondary"}`}
@@ -94,6 +94,14 @@ const GameControls = ({
               城市
             </button>
           )}
+          <button
+            type="button"
+            className={`control-button-compact ${buildMode === "city" ? "active" : "secondary"}`}
+            data-guide-target="build-city-btn"
+            onClick={() => onBuild("city")}
+          >
+            城市
+          </button>
           {buildMode && (
             <button
               type="button"

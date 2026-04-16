@@ -4,6 +4,7 @@ import PlayerPanel from "./components/PlayerPanel";
 import GameControls from "./components/GameControls";
 import GuideOverlay from "./components/GuideOverlay";
 import HelpPanel from "./components/HelpPanel";
+import SpeechBubble from "./components/SpeechBubble";
 import { api } from "./services/api";
 import "./Game.css";
 
@@ -80,11 +81,13 @@ const Game = () => {
   const [showTutorial, setShowTutorial] = useState(shouldShowTutorialInitially);
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
   const [tutorialTargetRect, setTutorialTargetRect] = useState(null);
+  const [currentSpeech, setCurrentSpeech] = useState(null);
 
   // 【新增】1. 骰子弹窗状态
   const [dicePopup, setDicePopup] = useState(null);
 
   const aiTurnLockRef = useRef(false);
+  const speechQueueRef = useRef([]);
 
   const currentPlayer = useMemo(
     () => gameState?.players?.find((player) => player.player_id === gameState.current_player_id),
@@ -196,6 +199,7 @@ const Game = () => {
   };
 
   const handleBuild = async (buildingType, position) => {
+    console.log('[Game] handleBuild', { buildingType, position, gameId, currentPlayerId: gameState?.current_player_id, phase: gameState?.phase });
     if (!gameId || !gameState) {
       return;
     }
@@ -204,6 +208,7 @@ const Game = () => {
     setError(null);
     try {
       const result = await api.build(gameId, gameState.current_player_id, buildingType, position);
+      console.log('[Game] build result', result);
       if (!result.success) {
         setError(result.error || result.message || "建造失败");
         return;
@@ -212,6 +217,7 @@ const Game = () => {
       setGameState(result.game_state);
       setMessage(result.message || `已建造${BUILD_MODE_LABEL[buildingType] || buildingType}`);
     } catch (requestError) {
+      console.error('[Game] build request error', requestError);
       setError(`建造失败: ${requestError.message}`);
     } finally {
       setLoading(false);
@@ -299,6 +305,21 @@ const handleTrade = async (giveOrState, receive) => {
         }
 
         setGameState(result.game_state);
+        
+        // 处理 AI 发言
+        const aiSpeeches = result.ai_speeches || [];
+        console.log("[Game] AI发言数据:", aiSpeeches); // 调试：查看是否收到发言
+        
+        if (aiSpeeches.length > 0) {
+          console.log("[Game] 将发言加入队列，共", aiSpeeches.length, "条");
+          speechQueueRef.current = [...aiSpeeches]; // 创建新数组副本
+          // 立即显示第一条发言
+          setCurrentSpeech(aiSpeeches[0]);
+          console.log("[Game] 设置当前发言:", aiSpeeches[0]);
+        } else {
+          console.log("[Game] 没有AI发言");
+        }
+        
         const actionSummary = (result.actions || [])
           .map((action) => {
             if (action.type === "roll_dice") {
@@ -373,6 +394,7 @@ const handleTrade = async (giveOrState, receive) => {
     }
 
     if (buildMode === "settlement" && clickType === "vertex") {
+      console.log('[Game] clicked vertex for settlement', { hex, direction, buildMode, phase: gameState.phase });
       handleBuild("settlement", [hex.q, hex.r, direction]);
       setBuildMode(null);
       setMessage("正在放置村庄...");
@@ -380,6 +402,7 @@ const handleTrade = async (giveOrState, receive) => {
     }
 
     if (buildMode === "road" && clickType === "edge") {
+      console.log('[Game] clicked edge for road', { hex, direction, buildMode, phase: gameState.phase });
       handleBuild("road", [hex.q, hex.r, direction]);
       setBuildMode(null);
       setMessage("正在放置道路...");
@@ -387,6 +410,7 @@ const handleTrade = async (giveOrState, receive) => {
     }
 
     if (buildMode === "city" && clickType === "vertex") {
+      console.log('[Game] clicked vertex for city', { hex, direction, buildMode, phase: gameState.phase });
       handleBuild("city", [hex.q, hex.r, direction]);
       setBuildMode(null);
       setMessage("正在升级城市...");
@@ -565,6 +589,7 @@ const handleTrade = async (giveOrState, receive) => {
                   setMessage("请在地图上选择一条边放置道路。");
                 } else if (type === "city") {
                   setMessage("请选择你自己的村庄升级为城市。");
+                  setMessage("请选择你已有的村庄进行城市升级。");
                 }
               }}
               onTrade={handleTrade}
@@ -584,6 +609,8 @@ const handleTrade = async (giveOrState, receive) => {
                 hexagons={gameState.hex_map.hexagons}
                 buildings={gameState.vertex_buildings}
                 roads={gameState.edge_buildings}
+                players={gameState.players}
+                currentPlayerId={gameState.current_player_id}
                 onHexClick={handleHexClick}
                 buildMode={buildMode}
                 currentPhase={gameState.phase}
@@ -647,6 +674,19 @@ const handleTrade = async (giveOrState, receive) => {
       )}
 
       {message && <div className="message-toast success">{message}</div>}
+
+      <SpeechBubble 
+        speech={currentSpeech} 
+        onDismiss={() => {
+          speechQueueRef.current.shift();
+          if (speechQueueRef.current.length > 0) {
+            setCurrentSpeech(speechQueueRef.current[0]);
+          } else {
+            setCurrentSpeech(null);
+          }
+        }}
+        autoHideDuration={3500}
+      />
 
       {error && (
         <div className="message-toast error">

@@ -23,6 +23,8 @@ const HexagonMap = ({
   hexagons,
   buildings,
   roads,
+  players = [],
+  currentPlayerId = null,
   onHexClick,
   buildMode,
   currentPhase,
@@ -36,6 +38,55 @@ const HexagonMap = ({
     () => new Set((hintPositions || []).map((pos) => `${pos[0]},${pos[1]},${pos[2]}`)),
     [hintPositions]
   );
+
+  // 当前玩家已建的村庄顶点集合（用于 city 模式下高亮与可选）
+  const playerSettlementKeys = useMemo(() => {
+    const s = new Set();
+    Object.values(buildings || {}).forEach((b) => {
+      if (b.player_id === currentPlayerId && b.type === 'settlement') {
+        const [q, r, dir] = b.position;
+        s.add(`${q},${r},${dir}`);
+      }
+    });
+    return s;
+  }, [buildings, currentPlayerId]);
+
+  // 计算被占用顶点集合（用于判断某顶点是否可建村庄）
+  const occupiedVertexKeys = useMemo(() => {
+    const s = new Set();
+    Object.values(buildings || {}).forEach((b) => {
+      const [q, r, dir] = b.position;
+      s.add(`${q},${r},${dir}`);
+    });
+    return s;
+  }, [buildings]);
+
+  const getAdjacentVertexKeys = (q, r, direction) => {
+    const adjacent = [
+      `${q},${r},${(direction + 1) % 6}`,
+      `${q},${r},${(direction - 1 + 6) % 6}`,
+    ];
+    if (direction === 0) {
+      adjacent.push(`${q + 1},${r - 1},3`);
+      adjacent.push(`${q},${r - 1},4`);
+    } else if (direction === 1) {
+      adjacent.push(`${q + 1},${r - 1},4`);
+      adjacent.push(`${q + 1},${r},5`);
+    } else if (direction === 2) {
+      adjacent.push(`${q + 1},${r},5`);
+      adjacent.push(`${q},${r + 1},0`);
+    } else if (direction === 3) {
+      adjacent.push(`${q},${r + 1},0`);
+      adjacent.push(`${q - 1},${r + 1},1`);
+    } else if (direction === 4) {
+      adjacent.push(`${q - 1},${r + 1},1`);
+      adjacent.push(`${q - 1},${r},2`);
+    } else if (direction === 5) {
+      adjacent.push(`${q - 1},${r},2`);
+      adjacent.push(`${q},${r - 1},3`);
+    }
+    return adjacent;
+  };
 
   const hexToPixel = (q, r) => {
     const size = 60;
@@ -201,16 +252,43 @@ const HexagonMap = ({
 
         {/* 渲染顶点提示/点击层 */}
         {isSetupOrBuildMode && (!buildMode || buildMode === "settlement") && hexagons?.flatMap((hex) => {
+        {isSetupOrBuildMode && (!buildMode || buildMode === "settlement" || buildMode === "city") && hexagons?.flatMap((hex) => {
             const { x, y } = hexToPixel(hex.q, hex.r);
             return [0, 1, 2, 3, 4, 5].map((dir) => {
               const vertex = getVertexPosition(x, y, dir);
               const key = `${hex.q},${hex.r},${dir}`;
+              const isOwnerSettlement = playerSettlementKeys.has(key);
+              const allowClickCity = buildMode === 'city' ? isOwnerSettlement : true;
+              let allowClickSettlement = true;
+              if (buildMode === 'settlement') {
+                if (occupiedVertexKeys.has(key)) {
+                  allowClickSettlement = false;
+                } else {
+                  const adj = getAdjacentVertexKeys(hex.q, hex.r, dir);
+                  for (const a of adj) {
+                    if (occupiedVertexKeys.has(a)) {
+                      allowClickSettlement = false;
+                      break;
+                    }
+                  }
+                }
+              }
+              const allowClick = buildMode === 'settlement' ? allowClickSettlement : allowClickCity;
+              const classNames = ["vertex-clickable"];
+              if (hintKeySet.has(key)) classNames.push("hint-target-vertex");
+              if (buildMode === 'city' && isOwnerSettlement) classNames.push('owner-settlement');
+              if (buildMode === 'city' && !isOwnerSettlement) classNames.push('vertex-disabled');
+              if (buildMode === 'settlement' && allowClick) classNames.push('vertex-available');
+              if (buildMode === 'settlement' && !allowClick) classNames.push('vertex-disabled');
+
               return (
                 <circle
                   key={`vertex-guide-${key}`}
                   cx={vertex.x} cy={vertex.y} r="8"
                   className={`vertex-clickable ${hintKeySet.has(key) ? "hint-target-vertex" : ""}`}
                   onClick={(e) => { e.stopPropagation(); onHexClick?.(hex, "vertex", dir); }}
+                  className={classNames.join(' ')}
+                  onClick={(e) => { e.stopPropagation(); if (allowClick) onHexClick?.(hex, "vertex", dir); }}
                 />
               );
             });
@@ -241,11 +319,13 @@ const HexagonMap = ({
         })}
 
         {/* 渲染已有的建筑 */}
+        {/* 渲染已有的建筑：按玩家颜色区分 */}
         {buildings && Object.entries(buildings).map(([key, b]) => {
           if (!b?.position) return null;
           const [q, r, dir] = b.position;
           const { x, y } = hexToPixel(q, r);
           const vertex = getVertexPosition(x, y, dir);
+<<<<<<< Updated upstream
 
           const buildColor = playerColorMap[String(b.player_id)] || "#ffffff";
 
@@ -260,6 +340,22 @@ const HexagonMap = ({
               />
               <text textAnchor="middle" y="5" fontSize="16" style={{ pointerEvents: "none" }}>
                 {b.type === "city" ? "🏛️" : "🏠"}
+=======
+          // 找到对应玩家颜色（后端 player 对象中包含 color 字段）
+          const owner = players?.find((p) => p.player_id === b.player_id) || {};
+          const ownerColor = owner.color || (b.player_id ? `hsl(${(b.player_id * 67) % 360} 60% 45%)` : '#888');
+
+          // 城市绘制为带边框的大圆，村庄为小圆，颜色基于玩家颜色
+          const fillColor = ownerColor;
+          const strokeColor = '#ffffff';
+          const isCity = b.type === 'city';
+
+          return (
+            <g key={`build-built-${key}`} transform={`translate(${vertex.x}, ${vertex.y})`} style={{ pointerEvents: 'none' }}>
+              <circle r={isCity ? 16 : 12} fill={fillColor} stroke={strokeColor} strokeWidth={isCity ? 3 : 2} />
+              <text textAnchor="middle" y="6" fontSize={isCity ? 16 : 14} style={{ pointerEvents: 'none' }}>
+                {isCity ? '🏛️' : '🏠'}
+>>>>>>> Stashed changes
               </text>
             </g>
           );
