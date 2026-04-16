@@ -251,7 +251,6 @@ const HexagonMap = ({
         })}
 
         {/* 渲染顶点提示/点击层 */}
-        {isSetupOrBuildMode && (!buildMode || buildMode === "settlement") && hexagons?.flatMap((hex) => {
         {isSetupOrBuildMode && (!buildMode || buildMode === "settlement" || buildMode === "city") && hexagons?.flatMap((hex) => {
             const { x, y } = hexToPixel(hex.q, hex.r);
             return [0, 1, 2, 3, 4, 5].map((dir) => {
@@ -285,8 +284,6 @@ const HexagonMap = ({
                 <circle
                   key={`vertex-guide-${key}`}
                   cx={vertex.x} cy={vertex.y} r="8"
-                  className={`vertex-clickable ${hintKeySet.has(key) ? "hint-target-vertex" : ""}`}
-                  onClick={(e) => { e.stopPropagation(); onHexClick?.(hex, "vertex", dir); }}
                   className={classNames.join(' ')}
                   onClick={(e) => { e.stopPropagation(); if (allowClick) onHexClick?.(hex, "vertex", dir); }}
                 />
@@ -318,7 +315,6 @@ const HexagonMap = ({
           );
         })}
 
-        {/* 渲染已有的建筑 */}
         {/* 渲染已有的建筑：按玩家颜色区分 */}
         {buildings && Object.entries(buildings).map(([key, b]) => {
           if (!b?.position) return null;
